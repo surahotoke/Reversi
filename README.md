@@ -17,4 +17,4 @@ HTMLとCSSで作ったリバーシです。
 https://surahotoke.github.io/Reversi
 
 ## プレイ動画
-https://github.com/user-attachments/assets/631f723a-3960-47b3-b05c-fe79e70b011a
+https://github.com/user-attachments/assets/676be787-ce84-49b8-b80f-f4d868ec3799
