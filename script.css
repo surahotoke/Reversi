@@ -1,0 +1,540 @@
+.reversi {
+  /* overflowを明示してview-timelineの基準にする */
+  overflow: hidden;
+}
+/* viewアニメーション判定のモトを設定 */
+.scan, .board > div::after {
+  animation: linear reverse;
+  animation-name: scan1, scan2;
+  animation-timeline: view(x), view(y);
+  animation-range: contain cover;
+}
+.WH {
+  counter-reset: WH;
+  --scan: var(--data1);
+  /* 復元 */
+  --W: mod(var(--scan) - 1, 8);
+  --H: round(down, (var(--scan) - 1) / 8);
+}
+.WH::after {
+  content: counter(WH, zero);
+}
+/* .lrに対応する.LRと.rlに対応する.RL */
+.LR, .RL {
+  counter-reset: var(--data1-name) var(--data2-name);
+  &::after {
+    /* zeroだけの場合でも高さが発生してしまうため1つはつけるようにする */
+    content: counter(var(--data2-name), ln) counter(var(--data1-name), zero) '0';
+  }
+}
+.LR {
+  --data1-name: lr1;
+  --data2-name: lr2;
+  /* 取れるマスを取り出す */
+  --d: mod(var(--data1) - 1, 8);
+  --l: round(down, (var(--data1) - 1) / 8);
+  --ul: mod(var(--data2) - 1, 8);
+  --ld: round(down, (var(--data2) - 1) / 8);
+}
+.RL {
+  --data1-name: rl1;
+  --data2-name: rl2;
+  /* 取れるマスを取り出す */
+  --u: mod(var(--data1) - 1, 8);
+  --r: round(down, (var(--data1) - 1) / 8);
+  --dr: mod(var(--data2) - 1, 8);
+  --ru: round(down, (var(--data2) - 1) / 8);
+  /* 取れるマス開始位置 */
+  --Wr: calc(var(--W) + var(--r));
+  --Wru: calc(var(--W) + var(--ru));
+  --Hru: calc(var(--H) - var(--ru));
+  --Hu: calc(var(--H) - var(--u));
+  --Wul: calc(var(--W) - var(--ul));
+  --Hul: calc(var(--H) - var(--ul));
+  --Wl: calc(var(--W) - var(--l));
+  --Wld: calc(var(--W) - var(--ld));
+  --Hld: calc(var(--H) + var(--ld));
+  --Hd: calc(var(--H) + var(--d));
+  --Wdr: calc(var(--W) + var(--dr));
+  --Hdr: calc(var(--H) + var(--dr));
+}
+/* afterで数値化し、ターゲットとさせて、またcounterで伝える */
+.board > div::after {
+  /* wだけの場合でも高さが発生してしまうため1つはつけるようにする */
+  --content: if(
+    style((--wW: 0) and (--hH: 0)): if(
+      style(--turn: 0): counter(var(--nb), h8) counter(var(--pb), h) counter(var(--hb), w8) counter(var(--wb), w) '0';
+      else: counter(var(--nw), h8) counter(var(--pw), h) counter(var(--hw), w8) counter(var(--ww), w) '0';
+    );
+    else: none;
+  );
+  content: var(--content);
+}
+.lr > div::after {
+  counter-increment: lr1 calc(var(--data1) - 1) lr2 calc(var(--data2) - 1);
+}
+.rl > div::after {
+  counter-increment: rl1 calc(var(--data1) - 1) rl2 calc(var(--data2) - 1);
+}
+.turn {
+  /* ターン切り替え(短くしすぎると精度が悪くなる) */
+  animation: turn linear 750ms infinite;
+  /* 本来の条件 */
+  --aps: if(
+    style(--scan: 0): paused;
+    else: running;
+  );
+  animation-play-state: var(--aps);
+  /* なるべく同期させる */
+  --help1: calc(var(--guide) - clamp(25, var(--guide), 50));
+  --help2: calc(var(--guide) - clamp(75, var(--guide), 100));
+  --pointer-events: if(
+    style((--help1: 0) or (--help2: 0)): all;
+    else: none;
+  );
+  pointer-events: var(--pointer-events);
+}
+/* 誤差を減らす(実際はboardの方のhover) */
+.turn:hover:active {
+  animation-play-state: running;
+}
+/* どちらも左上を原点とする */
+.lr > div {
+  --w: round(down, (sibling-index() - 1) / 8);
+  --h: calc(7 - mod(sibling-index() - 1, 8));
+}
+.rl > div {
+  --w: calc(7 - round(down, (sibling-index() - 1) / 8));
+  --h: mod(sibling-index() - 1, 8);
+}
+.board > div {
+  /* アクションと状態(短くしすぎると精度が悪くなる) */
+  animation: gb linear 300ms forwards, gw linear 300ms forwards, bw steps(2, jump-none) 200ms infinite;
+  /* 初期配置 */
+  --init: if(
+    style(
+      ((--w: 3) and (--h: 3)) or
+      ((--w: 4) and (--h: 4))
+    ): 1;
+    style(
+      ((--w: 3) and (--h: 4)) or
+      ((--w: 4) and (--h: 3))
+    ): 2;
+    else: var(--first);
+  );
+  /* 反転操作をするために配置されているかを分岐させておく */
+  --state: if(
+    style(--init: 0): 0;
+    else: calc(1 + mod(var(--init) - 1 + var(--mode), 2));
+  );
+  /* マスの斜め＼座標 */
+  --p: calc(var(--w) - var(--h) + 5);
+  /* マスの斜め／座標 */
+  --n: calc(var(--w) + var(--h) - 2);
+  /* 黒判定ー軸識別用 */
+  --wb: if(
+    style(--w: 0): w0b;
+    style(--w: 1): w1b;
+    style(--w: 2): w2b;
+    style(--w: 3): w3b;
+    style(--w: 4): w4b;
+    style(--w: 5): w5b;
+    style(--w: 6): w6b;
+    else: w7b;
+  );
+  /* 白判定ー軸識別用 */
+  --ww: if(
+    style(--w: 0): w0w;
+    style(--w: 1): w1w;
+    style(--w: 2): w2w;
+    style(--w: 3): w3w;
+    style(--w: 4): w4w;
+    style(--w: 5): w5w;
+    style(--w: 6): w6w;
+    else: w7w;
+  );
+  /* 黒判定｜軸識別用 */
+  --hb: if(
+    style(--h: 0): h0b;
+    style(--h: 1): h1b;
+    style(--h: 2): h2b;
+    style(--h: 3): h3b;
+    style(--h: 4): h4b;
+    style(--h: 5): h5b;
+    style(--h: 6): h6b;
+    else: h7b;
+  );
+  /* 白判定｜軸識別用 */
+  --hw: if(
+    style(--h: 0): h0w;
+    style(--h: 1): h1w;
+    style(--h: 2): h2w;
+    style(--h: 3): h3w;
+    style(--h: 4): h4w;
+    style(--h: 5): h5w;
+    style(--h: 6): h6w;
+    else: h7w;
+  );
+  /* 黒判定＼軸識別用 */
+  --pb: if(
+    style(--p: 0): p0b;
+    style(--p: 1): p1b;
+    style(--p: 2): p2b;
+    style(--p: 3): p3b;
+    style(--p: 4): p4b;
+    style(--p: 5): p5b;
+    style(--p: 6): p6b;
+    style(--p: 7): p7b;
+    style(--p: 8): p8b;
+    style(--p: 9): p9b;
+    style(--p: 10): p10b;
+    else: none;
+  );
+  /* 白判定＼軸識別用 */
+  --pw: if(
+    style(--p: 0): p0w;
+    style(--p: 1): p1w;
+    style(--p: 2): p2w;
+    style(--p: 3): p3w;
+    style(--p: 4): p4w;
+    style(--p: 5): p5w;
+    style(--p: 6): p6w;
+    style(--p: 7): p7w;
+    style(--p: 8): p8w;
+    style(--p: 9): p9w;
+    style(--p: 10): p10w;
+    else: none;
+  );
+  /* 黒判定／軸識別用 */
+  --nb: if(
+    style(--n: 0): n0b;
+    style(--n: 1): n1b;
+    style(--n: 2): n2b;
+    style(--n: 3): n3b;
+    style(--n: 4): n4b;
+    style(--n: 5): n5b;
+    style(--n: 6): n6b;
+    style(--n: 7): n7b;
+    style(--n: 8): n8b;
+    style(--n: 9): n9b;
+    style(--n: 10): n10b;
+    else: none;
+  );
+  /* 白判定／軸識別用 */
+  --nw: if(
+    style(--n: 0): n0w;
+    style(--n: 1): n1w;
+    style(--n: 2): n2w;
+    style(--n: 3): n3w;
+    style(--n: 4): n4w;
+    style(--n: 5): n5w;
+    style(--n: 6): n6w;
+    style(--n: 7): n7w;
+    style(--n: 8): n8w;
+    style(--n: 9): n9w;
+    style(--n: 10): n10w;
+    else: none;
+  );
+  /* 判定用カウンター（取れるマス数）をリセット */
+  --counter-reset: if(
+    style(--state: 1): var(--wb) -7 var(--hb) -7 var(--pb) -7 var(--nb) -7;
+    style(--state: 2): var(--ww) -7 var(--hw) -7 var(--pw) -7 var(--nw) -7;
+    else: none;
+  );
+  counter-reset: var(--counter-reset);
+  /* 判定用カウンター（取れるマス数）を進める、緑なら判定にかかる */
+  --counter-increment: if(
+    style(--state: 1): var(--ww) var(--hw) var(--pw) var(--nw);
+    style(--state: 2): var(--wb) var(--hb) var(--pb) var(--nb);
+    else: var(--wb) 7 var(--ww) 7 var(--hb) 7 var(--hw) 7 var(--pb) 7 var(--pw) 7 var(--nb) 7 var(--nw) 7;
+  );
+  counter-increment: var(--counter-increment);
+  /* 緑の場合に置ける状態にあるか */
+  --place: if(
+    style(--state: 0): if(
+      style(--turn: 0): counter(var(--wb), valid) counter(var(--hb), valid) counter(var(--pb), valid) counter(var(--nb), valid);
+      else: counter(var(--ww), valid) counter(var(--hw), valid) counter(var(--pw), valid) counter(var(--nw), valid);
+    );
+    else: none;
+  );
+  /* アクションは押していなければ動かない */
+  --wW: calc(var(--W) - var(--w));
+  --hH: calc(var(--H) - var(--h));
+  /* 駒配置操作。押しているマスで有効、ターンにあったアニメーションを有効にする。 */
+  --aps1: if(
+    style((--wW: 0) and (--hH: 0)): if(
+      style(--turn: 0): running, paused;
+      else: paused, running;
+    );
+    else: paused, paused;
+  );
+  /* 反転操作の判定のために設定 */
+  --wWr: calc(var(--w) - clamp(var(--W), var(--w), var(--Wr)));
+  --wWru: calc(var(--w) - clamp(var(--W), var(--w), var(--Wru)));
+  --hHru: calc(var(--h) - clamp(var(--Hru), var(--h), var(--H)));
+  --hHu: calc(var(--h) - clamp(var(--Hu), var(--h), var(--H)));
+  --wWul: calc(var(--w) - clamp(var(--Wul), var(--w), var(--W)));
+  --hHul: calc(var(--h) - clamp(var(--Hul), var(--h), var(--H)));
+  --wWl: calc(var(--w) - clamp(var(--Wl), var(--w), var(--W)));
+  --wWld: calc(var(--w) - clamp(var(--Wl), var(--w), var(--W)));
+  --hHld: calc(var(--h) - clamp(var(--H), var(--h), var(--Hld)));
+  --hHd: calc(var(--h) - clamp(var(--H), var(--h), var(--Hd)));
+  --wWdr: calc(var(--w) - clamp(var(--W), var(--w), var(--Wdr)));
+  --hHdr: calc(var(--h) - clamp(var(--H), var(--h), var(--Hdr)));
+  /* 反転操作。どこも押されていなければ無効、押されているマスは無効、関係ないマスも無効 */
+  --aps2: if(
+    style(--scan: 0): paused;
+    style((--wW: 0) and (--hH: 0)): paused;
+    style(
+      ((--wWr: 0) and (--hH: 0)) or
+      ((--wWru: 0) and (--hHru: 0)) or
+      ((--wW: 0) and (--hHu: 0)) or
+      ((--wWul: 0) and (--hHul: 0)) or
+      ((--wWl: 0) and (--hH: 0)) or
+      ((--wWld: 0) and (--hHld: 0)) or
+      ((--wW: 0) and (--hHd: 0)) or
+      ((--wWdr: 0) and (--hHdr: 0))
+    ): running;
+    else: paused;
+  );
+  animation-play-state: var(--aps1), var(--aps2);
+  /* 触れたら変わるまで持っていく */
+  --help1: calc(var(--guide) - clamp(1, var(--guide), 70));
+  --pointer-events: if(
+    style((--scan: 0) and (--help1: 0)): all;
+    else: none;
+  );
+  pointer-events: var(--pointer-events);
+  /* マス更新（ここでは処理せず押しているマスを全体に伝える） */
+  &:hover:active {
+    /* 初期値と最初のマスを区別するために1ずらしておく */
+    counter-increment: var(--counter-increment) WH calc(8 * var(--h) + var(--w) + 1);
+  }
+}
+/* @counter-style */
+/* 取得したマス数を伝える */
+@counter-style w8 {
+  system: symbolic;
+  symbols: '00000000';
+  range: 1 6;
+  fallback: invalid;
+}
+@counter-style w {
+  system: symbolic;
+  symbols: '0';
+  range: 1 6;
+  fallback: invalid;
+}
+@counter-style h8 {
+  system: symbolic;
+  symbols: '\A\A\A\A\A\A\A\A';
+  range: 1 6;
+  fallback: invalid;
+}
+@counter-style h {
+  system: symbolic;
+  symbols: '\A';
+  range: 1 6;
+  fallback: invalid;
+}
+/* 伝わったマス数を上に伝える */
+@counter-style zero {
+  system: symbolic;
+  symbols: '0';
+  fallback: invalid;
+}
+@counter-style ln {
+  system: symbolic;
+  symbols: '\A';
+  fallback: invalid;
+}
+/* 取れるマス数の範囲 */
+@counter-style valid {
+  system: cyclic;
+  symbols: "置ける\A";
+  range: 1 6;
+  fallback: invalid;
+}
+/* 無効 */
+@counter-style invalid {
+  system: cyclic;
+  symbols: "";
+}
+/* @keyframes */
+/* ターン切り替え。同期させるためにguideで修正力を持たせる */
+@keyframes turn {
+  to {
+    --turn: 1;
+    --guide: 100;
+  }
+}
+/* 緑→黒。同期させるためにguideで修正力を持たせる */
+@keyframes gb {
+  to {
+    --first: 1;
+    --guide: 100;
+  }
+}
+/* 緑→白。同期させるためにguideで修正力を持たせる */
+@keyframes gw {
+  to {
+    --first: 2;
+    --guide: 100;
+  }
+}
+/* 黒↔︎白 */
+@keyframes bw {
+  to {
+    --mode: 1;
+  }
+}
+/* 横用 */
+@keyframes scan1 {
+  to {
+    --data1: calc(85dvmin / 1px);
+  }
+}
+/* 縦用 */
+@keyframes scan2 {
+  to {
+    --data2: calc(85dvmin / 1px);
+  }
+}
+/* @property */
+/* アニメーションで変えれるようにする */
+@property --turn {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --guide {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --mode {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --data1 {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+@property --data2 {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+/* ここで設定しておかないとif文でcalcが解釈計算されない */
+@property --scan {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --help1 {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --help2 {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --state {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --w {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --h {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --p {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wW {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --hH {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --wWr {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wWru {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHru {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHu {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wWul {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHul {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wWl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wWld {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHld {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHd {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --wWdr {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --hHdr {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}

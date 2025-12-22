@@ -1,0 +1,92 @@
+.reversi, .board {
+  width: 85dvmin;
+  aspect-ratio: 1;
+}
+/* 基本的な見た目 */
+.reversi {
+  background-color: green;
+  position: relative;
+  border: solid 4px;
+  border-radius: 2%;
+  pointer-events: none;
+}
+.scan {
+  position: absolute;
+  &::after {
+    /* absoluteの子なのでピッタリサイズ */
+    display: block;
+  }
+}
+/* うまく情報を渡せるようにする */
+.scan::after, .board > div::after {
+  color: transparent;
+  letter-spacing: calc(1px - 1ch);
+  white-space: pre;
+  line-height: 1px;
+}
+.turn {
+  position: absolute;
+}
+.board {
+  box-sizing: border-box;
+  padding: 6px;
+  position: absolute;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+}
+/* 8方向の判定を網羅するためにsideways-lrとsideways-rlの組み合わせで対応 */
+.lr {
+  writing-mode: sideways-lr;
+}
+.rl {
+  writing-mode: sideways-rl;
+}
+.board > div {
+  border: solid 2px;
+  /* 戻す */
+  writing-mode: horizontal-tb;
+  /* 押されたらその要素で:hoverも発動させれるように上に上げる */
+  &:active {
+    z-index: 999;
+  }
+  /* 置けるマスの設定 */
+  &::before {
+    cursor: pointer;
+    pointer-events: all;
+    --background-color: if(
+      style(--turn: 0): red;
+      else: blue;
+    );
+    background-color: var(--background-color);
+    /* 1つしか表示されなくする */
+    position: absolute;
+    white-space: pre;
+    line-height: 0;
+    font-size: 2.4dvmin;
+    padding-block: 0.5em;
+    margin: 0.2em;
+    content: var(--place);
+  }
+  /* マス反転情報の受け渡し用 */
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+/* .lrの方が先にあるので描画はこちらにしておく */
+.lr > div {
+  border-radius: 8%;
+  /* 色付け */
+  --color: if(
+    style(--state: 1): black;
+    style(--state: 2): white;
+    else: darkgreen;
+  );
+  background: radial-gradient(closest-side, var(--color) 75%, darkgreen 75%);
+}
+/* .rlはbefore, afterのみにしておく */
+.rl > div {
+  border-color: transparent;
+}
