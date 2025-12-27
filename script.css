@@ -269,6 +269,7 @@
     else: paused, paused;
   );
   /* 反転操作の判定のために設定 */
+  --wWhH: calc(abs(var(--wW)) - abs(var(--hH)));
   --wWr: calc(var(--w) - clamp(var(--W), var(--w), var(--Wr)));
   --wWru: calc(var(--w) - clamp(var(--W), var(--w), var(--Wru)));
   --hHru: calc(var(--h) - clamp(var(--Hru), var(--h), var(--H)));
@@ -287,13 +288,13 @@
     style((--wW: 0) and (--hH: 0)): paused;
     style(
       ((--wWr: 0) and (--hH: 0)) or
-      ((--wWru: 0) and (--hHru: 0)) or
+      ((--wWru: 0) and (--hHru: 0) and (--wWhH: 0)) or
       ((--wW: 0) and (--hHu: 0)) or
-      ((--wWul: 0) and (--hHul: 0)) or
+      ((--wWul: 0) and (--hHul: 0) and (--wWhH: 0)) or
       ((--wWl: 0) and (--hH: 0)) or
-      ((--wWld: 0) and (--hHld: 0)) or
+      ((--wWld: 0) and (--hHld: 0) and (--wWhH: 0)) or
       ((--wW: 0) and (--hHd: 0)) or
-      ((--wWdr: 0) and (--hHdr: 0))
+      ((--wWdr: 0) and (--hHdr: 0) and (--wWhH: 0))
     ): running;
     else: paused;
   );
@@ -476,6 +477,11 @@
 @property --hH {
   syntax: "<number>";
   inherits: true;
+  initial-value: 0;
+}
+@property --wWhH {
+  syntax: "<number>";
+  inherits: false;
   initial-value: 0;
 }
 @property --wWr {
