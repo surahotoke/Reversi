@@ -13,8 +13,8 @@
   counter-reset: WH;
   --scan: var(--data1);
   /* 復元 */
-  --W: mod(var(--scan) - 1, 8);
-  --H: round(down, (var(--scan) - 1) / 8);
+  --W: calc(mod(var(--scan) - 1, 8));
+  --H: calc(round(down, (var(--scan) - 1) / 8));
 }
 .WH::after {
   content: counter(WH, zero);
@@ -277,7 +277,7 @@
   --wWul: calc(var(--w) - clamp(var(--Wul), var(--w), var(--W)));
   --hHul: calc(var(--h) - clamp(var(--Hul), var(--h), var(--H)));
   --wWl: calc(var(--w) - clamp(var(--Wl), var(--w), var(--W)));
-  --wWld: calc(var(--w) - clamp(var(--Wl), var(--w), var(--W)));
+  --wWld: calc(var(--w) - clamp(var(--Wld), var(--w), var(--W)));
   --hHld: calc(var(--h) - clamp(var(--H), var(--h), var(--Hld)));
   --hHd: calc(var(--h) - clamp(var(--H), var(--h), var(--Hd)));
   --wWdr: calc(var(--w) - clamp(var(--W), var(--w), var(--Wdr)));
@@ -458,6 +458,16 @@
   syntax: "<integer>";
   inherits: false;
   initial-value: 0;
+}
+@property --W {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: -1;
+}
+@property --H {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: -1;
 }
 @property --p {
   syntax: "<integer>";
