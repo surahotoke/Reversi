@@ -62,10 +62,7 @@
 .board > div::after {
   /* wだけの場合でも高さが発生してしまうため1つはつけるようにする */
   --content: if(
-    style((--wW: 0) and (--hH: 0)): if(
-      style(--turn: 0): counter(var(--nb), h8) counter(var(--pb), h) counter(var(--hb), w8) counter(var(--wb), w) '0';
-      else: counter(var(--nw), h8) counter(var(--pw), h) counter(var(--hw), w8) counter(var(--ww), w) '0';
-    );
+    style((--wW: 0) and (--hH: 0)): counter(var(--nL), h8) counter(var(--pL), h) counter(var(--hL), w8) counter(var(--wL), w) '0';
     else: none;
   );
   content: var(--content);
@@ -131,130 +128,76 @@
   --p: calc(var(--w) - var(--h) + 5);
   /* マスの斜め／座標 */
   --n: calc(var(--w) + var(--h) - 2);
-  /* 黒判定ー軸識別用 */
-  --wb: if(
-    style(--w: 0): w0b;
-    style(--w: 1): w1b;
-    style(--w: 2): w2b;
-    style(--w: 3): w3b;
-    style(--w: 4): w4b;
-    style(--w: 5): w5b;
-    style(--w: 6): w6b;
-    else: w7b;
+  /* ー軸識別用 */
+  --wL: if(
+    style(--w: 0): w0;
+    style(--w: 1): w1;
+    style(--w: 2): w2;
+    style(--w: 3): w3;
+    style(--w: 4): w4;
+    style(--w: 5): w5;
+    style(--w: 6): w6;
+    else: w7;
   );
-  /* 白判定ー軸識別用 */
-  --ww: if(
-    style(--w: 0): w0w;
-    style(--w: 1): w1w;
-    style(--w: 2): w2w;
-    style(--w: 3): w3w;
-    style(--w: 4): w4w;
-    style(--w: 5): w5w;
-    style(--w: 6): w6w;
-    else: w7w;
+  /* ｜軸識別用 */
+  --hL: if(
+    style(--h: 0): h0;
+    style(--h: 1): h1;
+    style(--h: 2): h2;
+    style(--h: 3): h3;
+    style(--h: 4): h4;
+    style(--h: 5): h5;
+    style(--h: 6): h6;
+    else: h7;
   );
-  /* 黒判定｜軸識別用 */
-  --hb: if(
-    style(--h: 0): h0b;
-    style(--h: 1): h1b;
-    style(--h: 2): h2b;
-    style(--h: 3): h3b;
-    style(--h: 4): h4b;
-    style(--h: 5): h5b;
-    style(--h: 6): h6b;
-    else: h7b;
-  );
-  /* 白判定｜軸識別用 */
-  --hw: if(
-    style(--h: 0): h0w;
-    style(--h: 1): h1w;
-    style(--h: 2): h2w;
-    style(--h: 3): h3w;
-    style(--h: 4): h4w;
-    style(--h: 5): h5w;
-    style(--h: 6): h6w;
-    else: h7w;
-  );
-  /* 黒判定＼軸識別用 */
-  --pb: if(
-    style(--p: 0): p0b;
-    style(--p: 1): p1b;
-    style(--p: 2): p2b;
-    style(--p: 3): p3b;
-    style(--p: 4): p4b;
-    style(--p: 5): p5b;
-    style(--p: 6): p6b;
-    style(--p: 7): p7b;
-    style(--p: 8): p8b;
-    style(--p: 9): p9b;
-    style(--p: 10): p10b;
+  /* ＼軸識別用 */
+  --pL: if(
+    style(--p: 0): p0;
+    style(--p: 1): p1;
+    style(--p: 2): p2;
+    style(--p: 3): p3;
+    style(--p: 4): p4;
+    style(--p: 5): p5;
+    style(--p: 6): p6;
+    style(--p: 7): p7;
+    style(--p: 8): p8;
+    style(--p: 9): p9;
+    style(--p: 10): p10;
     else: none;
   );
-  /* 白判定＼軸識別用 */
-  --pw: if(
-    style(--p: 0): p0w;
-    style(--p: 1): p1w;
-    style(--p: 2): p2w;
-    style(--p: 3): p3w;
-    style(--p: 4): p4w;
-    style(--p: 5): p5w;
-    style(--p: 6): p6w;
-    style(--p: 7): p7w;
-    style(--p: 8): p8w;
-    style(--p: 9): p9w;
-    style(--p: 10): p10w;
+  /* ／軸識別用 */
+  --nL: if(
+    style(--n: 0): n0;
+    style(--n: 1): n1;
+    style(--n: 2): n2;
+    style(--n: 3): n3;
+    style(--n: 4): n4;
+    style(--n: 5): n5;
+    style(--n: 6): n6;
+    style(--n: 7): n7;
+    style(--n: 8): n8;
+    style(--n: 9): n9;
+    style(--n: 10): n10;
     else: none;
   );
-  /* 黒判定／軸識別用 */
-  --nb: if(
-    style(--n: 0): n0b;
-    style(--n: 1): n1b;
-    style(--n: 2): n2b;
-    style(--n: 3): n3b;
-    style(--n: 4): n4b;
-    style(--n: 5): n5b;
-    style(--n: 6): n6b;
-    style(--n: 7): n7b;
-    style(--n: 8): n8b;
-    style(--n: 9): n9b;
-    style(--n: 10): n10b;
-    else: none;
-  );
-  /* 白判定／軸識別用 */
-  --nw: if(
-    style(--n: 0): n0w;
-    style(--n: 1): n1w;
-    style(--n: 2): n2w;
-    style(--n: 3): n3w;
-    style(--n: 4): n4w;
-    style(--n: 5): n5w;
-    style(--n: 6): n6w;
-    style(--n: 7): n7w;
-    style(--n: 8): n8w;
-    style(--n: 9): n9w;
-    style(--n: 10): n10w;
-    else: none;
-  );
+  /* 判定を簡単にする */
+  --stateturn: calc(var(--state) + 3 * var(--turn) - 2 * var(--state) * var(--turn));
   /* 判定用カウンター（取れるマス数）をリセット */
   --counter-reset: if(
-    style(--state: 1): var(--wb) -7 var(--hb) -7 var(--pb) -7 var(--nb) -7;
-    style(--state: 2): var(--ww) -7 var(--hw) -7 var(--pw) -7 var(--nw) -7;
+    style(--stateturn: 1): var(--wL) -7 var(--hL) -7 var(--pL) -7 var(--nL) -7;
     else: none;
   );
   counter-reset: var(--counter-reset);
   /* 判定用カウンター（取れるマス数）を進める、緑なら判定にかかる */
   --counter-increment: if(
-    style(--state: 1): var(--ww) var(--hw) var(--pw) var(--nw);
-    style(--state: 2): var(--wb) var(--hb) var(--pb) var(--nb);
-    else: var(--wb) 7 var(--ww) 7 var(--hb) 7 var(--hw) 7 var(--pb) 7 var(--pw) 7 var(--nb) 7 var(--nw) 7;
+    style(--state: 0): var(--wL) 7 var(--hL) 7 var(--pL) 7 var(--nL) 7;
+    style(--stateturn: 2): var(--wL) var(--hL) var(--pL) var(--nL);
+    else: none;
   );
   counter-increment: var(--counter-increment);
   /* 緑の場合に置ける状態にあるか */
   --place: if(
-    style(--state: 0): if(
-      style(--turn: 0): counter(var(--wb), valid) counter(var(--hb), valid) counter(var(--pb), valid) counter(var(--nb), valid);
-      else: counter(var(--ww), valid) counter(var(--hw), valid) counter(var(--pw), valid) counter(var(--nw), valid);
-    );
+    style(--state: 0): counter(var(--wL), valid) counter(var(--hL), valid) counter(var(--pL), valid) counter(var(--nL), valid);
     else: none;
   );
   /* アクションは押していなければ動かない */
@@ -445,6 +388,11 @@
   initial-value: 0;
 }
 @property --state {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --stateturn {
   syntax: "<integer>";
   inherits: false;
   initial-value: 0;
