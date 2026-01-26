@@ -163,7 +163,7 @@
     style(--p: 8): p8;
     style(--p: 9): p9;
     style(--p: 10): p10;
-    else: none;
+    else: '';
   );
   /* ／軸識別用 */
   --nL: if(
@@ -178,7 +178,7 @@
     style(--n: 8): n8;
     style(--n: 9): n9;
     style(--n: 10): n10;
-    else: none;
+    else: '';
   );
   /* 判定を簡単にする */
   --stateturn: calc(var(--state) + 3 * var(--turn) - 2 * var(--state) * var(--turn));
