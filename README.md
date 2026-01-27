@@ -24,7 +24,7 @@ https://zenn.dev/jigjp_engineer/articles/c1cc55635c6039
 ## 構成ファイル
 - `index.html`（43行）
 - `style.css`（98行）
-- `script.css`（494行 / うちアットルール242行）
+- `script.css`（500行 / うちアットルール234行）
 
 ## 仕組み
 デカくなっちゃったので見たかったら、拡大してみてね！
@@ -150,11 +150,6 @@ sequenceDiagram
     Note over 人: 長押し終了
     Deactivate 人
 ```
-
-## 起きた奇跡
-`script.css`のコメント行を全て削除してコードのみにすると、アットルール以外の部分が`222行`、アットルール部分が`222行`となり、完璧な`1:1`の比率で合計が`444行`になります。
-
-正規表現モードで`\n\s*/\* .* \*/`を空文字に置換することで確認できます。
 
 ## 関連作品
 - [ビンゴ](https://github.com/surahotoke/Bingo)  

@@ -163,7 +163,7 @@
     style(--p: 8): p8;
     style(--p: 9): p9;
     style(--p: 10): p10;
-    else: '';
+    else: none;
   );
   /* ／軸識別用 */
   --nL: if(
@@ -178,7 +178,7 @@
     style(--n: 8): n8;
     style(--n: 9): n9;
     style(--n: 10): n10;
-    else: '';
+    else: none;
   );
   /* 判定を簡単にする */
   --stateturn: calc(var(--state) + 3 * var(--turn) - 2 * var(--state) * var(--turn));
@@ -195,9 +195,18 @@
     else: none;
   );
   counter-increment: var(--counter-increment);
+  /* noneはcounterで有効になってしまうので */
+  --pLcounter: if(
+    style(--pL: none): '';
+    else: counter(var(--pL), valid);
+  );
+  --nLcounter: if(
+    style(--nL: none): '';
+    else: counter(var(--nL), valid);
+  );
   /* 緑の場合に置ける状態にあるか */
   --place: if(
-    style(--state: 0): counter(var(--wL), valid) counter(var(--hL), valid) counter(var(--pL), valid) counter(var(--nL), valid);
+    style(--state: 0): counter(var(--wL), valid) counter(var(--hL), valid) var(--pLcounter) var(--nLcounter);
     else: none;
   );
   /* アクションは押していなければ動かない */
@@ -255,7 +264,6 @@
     counter-increment: var(--counter-increment) WH calc(8 * var(--h) + var(--w) + 1);
   }
 }
-/* @counter-style */
 /* 取得したマス数を伝える */
 @counter-style w8 {
   system: symbolic;
@@ -304,7 +312,6 @@
   system: cyclic;
   symbols: "";
 }
-/* @keyframes */
 /* ターン切り替え。同期させるためにguideで修正力を持たせる */
 @keyframes turn {
   to {
@@ -344,7 +351,6 @@
     --data2: calc(85dvmin / 1px);
   }
 }
-/* @property */
 /* アニメーションで変えれるようにする */
 @property --turn {
   syntax: "<integer>";
