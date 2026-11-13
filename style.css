@@ -1,0 +1,82 @@
+:root {
+  --square-size: 60px;
+  --square-border: 2px black;
+  --board-color: green;
+}
+html::before, html::after {
+  position: absolute;
+  position-anchor: --board;
+}
+html::before {
+  position-area: top;
+  font-size: 4rem;
+}
+html::after {
+  position-area: bottom;
+  white-space: pre;
+  tab-size: calc(.6*8*var(--square-size));
+  font-size: 2rem;
+}
+::scroll-marker-group {
+  anchor-name: --board;
+  margin-inline: auto;
+  width: calc(8*var(--square-size));
+  height: calc(8*var(--square-size));
+  border: solid 8px;
+  border-radius: 12px;
+  background: var(--board-color);
+  display: flex;
+  overflow: hidden;
+}
+::column {
+  timeline-scope: --mapping;
+  animation: mapping linear reverse both;
+  animation-timeline: --mapping;
+  animation-range: contain calc(100% - 127*var(--square-size));
+}
+::column::scroll-marker {
+  width: 0;
+  height: 0;
+  padding: calc(var(--square-size)/2);
+  box-shadow: inset 0 0 0 var(--square-border);
+  border-radius: 4px;
+  translate: calc((--col() - var(--id)) * var(--square-size)) calc((--row() - 1) * var(--square-size));
+  view-timeline: --mapping x;
+  --row: --row();
+  --col: --col();
+  --hint: if(
+    style(--count-self: 0): transparent;
+    else: color-mix(var(--player) var(--hint-ratio, 20%), var(--board-color));
+  );
+  background:
+    radial-gradient(var(--hint, transparent) calc(.12*var(--square-size)), transparent 0),
+    radial-gradient(var(--square-color, transparent) calc(.32*var(--square-size)), transparent 0);
+}
+::column::scroll-marker:hover { --hint-ratio: 50% }
+::column::scroll-marker:hover:active { --hint-ratio: 80% }
+@function --row() returns <integer> {
+  result: calc(if(
+    style(--id: 0): 0;
+    style(var(--id) <= 64): 1 + --digit(calc(var(--id) - 1), 8);
+    else: 8 - --digit(calc(var(--id) - 1), 8);
+  ));
+}
+@function --col() returns <integer> {
+  result: calc(if(
+    style(--id: 0): 0;
+    style(var(--id) <= 64): 1 + --digit(calc(var(--id) - 1));
+    else: 8 - --digit(calc(var(--id) - 1));
+  ));
+}
+@function --digit(--x <integer>, --place <integer>: 1, --base <integer>: 8) returns <integer> {
+  result: mod(round(down, var(--x) / var(--place)), var(--base));
+}
+@keyframes mapping {
+  from { --id: 1 }
+  to { --id: 128 }
+}
+@property --id {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
