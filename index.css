@@ -1,0 +1,18 @@
+html, body { overflow: hidden }
+html::before {
+  content: 'Reversi';
+}
+html::after {
+  content: '●' counter(black) '\9○' counter(white);
+}
+body {
+  height: 128px;
+  columns: 128;
+  scroll-marker-group: after;
+}
+body::before {
+  content: '';
+  display: block;
+  height: 100%;
+}
+::column::scroll-marker { content: '' }

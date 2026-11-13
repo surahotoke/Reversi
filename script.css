@@ -1,0 +1,328 @@
+html {
+  timeline-scope: --score;
+  animation: score linear;
+  animation-timeline: --score;
+  animation-range: -100% calc(8192px - 100%);
+  --stones: --digit(var(--score), 1, 65);
+  --black: --digit(var(--score), 65, 65);
+  --white: calc(var(--stones) - var(--black));
+  --player: if(
+    style(mod(var(--stones), 2) = 0): black;
+    else: white;
+  );
+}
+html::after {
+  counter-reset: result calc(2 + sign(var(--white) - var(--black)));
+  content: if(
+    style(var(--stones) < 64): revert-rule;
+    else: counter(result, symbols('●WIN' 'DRAW' '○WIN')) ' ' counter(black) ' - ' counter(white);
+  );
+}
+body {
+  counter-reset:
+    stones black white
+    a↔1 a↔2 a↔3 a↔4 a↔5 a↔6 a↔7 a↔8
+    a↕1 a↕2 a↕3 a↕4 a↕5 a↕6 a↕7 a↕8
+    a⤡1 a⤡2 a⤡3 a⤡4 a⤡5 a⤡6 a⤡7 a⤡8 a⤡9 a⤡10 a⤡11 a⤡12 a⤡13 a⤡14 a⤡15
+    a⤢1 a⤢2 a⤢3 a⤢4 a⤢5 a⤢6 a⤢7 a⤢8 a⤢9 a⤢10 a⤢11 a⤢12 a⤢13 a⤢14 a⤢15
+    b↔1 b↔2 b↔3 b↔4 b↔5 b↔6 b↔7 b↔8
+    b↕1 b↕2 b↕3 b↕4 b↕5 b↕6 b↕7 b↕8
+    b⤡1 b⤡2 b⤡3 b⤡4 b⤡5 b⤡6 b⤡7 b⤡8 b⤡9 b⤡10 b⤡11 b⤡12 b⤡13 b⤡14 b⤡15
+    b⤢1 b⤢2 b⤢3 b⤢4 b⤢5 b⤢6 b⤢7 b⤢8 b⤢9 b⤢10 b⤢11 b⤢12 b⤢13 b⤢14 b⤢15;
+  timeline-scope: --place, --count-a, --count-b;
+  animation: mapping linear reverse both, count-a linear, count-b linear;
+  animation-timeline: --place, --count-a, --count-b;
+  animation-range:
+    contain calc(100% - 127*var(--square-size)),
+    -100% calc(4096px - 100%),
+    -100% calc(4096px - 100%);
+  --place-row: --row();
+  --place-col: --col();
+  --←: --digit(var(--count-a));
+  --↑: --digit(var(--count-a), 8);
+  --↖: --digit(var(--count-a), 64);
+  --↗: --digit(var(--count-a), 512);
+  --→: --digit(var(--count-b));
+  --↓: --digit(var(--count-b), 8);
+  --↘: --digit(var(--count-b), 64);
+  --↙: --digit(var(--count-b), 512);
+}
+body::after {
+  content: counter(black, x65) counter(stones, x1);
+  position: fixed;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  font-size: 0;
+  white-space: pre;
+  letter-spacing: 1px;
+  word-spacing: 64px;
+  line-height: .1px;
+  scroll-timeline: --score x;
+}
+::column {
+  timeline-scope: --mapping, --count-self;
+  animation: mapping linear reverse both, count-self linear;
+  animation-timeline: --mapping, --count-self;
+  animation-range: inherit;
+}
+::column::scroll-marker {
+  overflow: hidden;
+  white-space: pre;
+  font-size: 0;
+  letter-spacing: 1px;
+  word-spacing: 63px;
+  --ab: if(style(var(--id) <= 64): a; else: b);
+  --Δ↓: calc(var(--row) - var(--place-row));
+  --Δ→: calc(var(--col) - var(--place-col));
+  --is-writing: if(
+    style((--count-a: 0) and (--count-b: 0)): 0;
+    style((--Δ↓: 0) and (calc(-1*var(--←)) <= var(--Δ→) <= var(--→))): 1;
+    style((--Δ→: 0) and (calc(-1*var(--↑)) <= var(--Δ↓) <= var(--↓))): 1;
+    style((--Δ→: var(--Δ↓)) and (calc(-1*var(--↖)) <= var(--Δ→) <= var(--↘))): 1;
+    style((--Δ→: calc(-1*var(--Δ↓))) and (calc(-1*var(--↙)) <= var(--Δ→) <= var(--↗))): 1;
+    else: 0;
+  );
+  --written-color: if(style(--is-writing: 1): var(--player));
+  transition: if(
+    style(--is-writing: 1): none;
+    else: --written-color 0s 9e9s allow-discrete;
+  );
+  --square-color: if(
+    style(--written-color: none): --initial-color();
+    else: var(--written-color);
+  );
+  pointer-events: if(style(--count-self: 0): none);
+  --↔: --↔();
+  --↕: --↕();
+  --⤡: --⤡();
+  --⤢: --⤢();
+  --square: if(
+    style(--square-color: transparent): E;
+    style(--square-color: var(--player)): P;
+    else: O;
+  );
+  counter-set: if(style(--square: P): var(--↔) -7 var(--↕) -7 var(--⤡) -7 var(--⤢) -7);
+  counter-increment:
+    if(
+      style(--square-color: transparent):;
+      style(--ab: a): stones var(--square-color);
+      else:)
+    if(
+      style(--square: E): var(--↔) 7 var(--↕) 7 var(--⤡) 7 var(--⤢) 7;
+      style(--square: O): var(--↔) var(--↕) var(--⤡) var(--⤢);
+      else:);
+  content: if(
+    style(--square: E):
+      counter(var(--⤢), valid-x512)
+      counter(var(--⤡), valid-x64)
+      counter(var(--↕), valid-x8)
+      counter(var(--↔), valid-x1);
+    else: '';
+  );
+  --count-name: if(
+    style((--row: var(--place-row)) and (--col: var(--place-col))): if(
+      style(--ab: a): --count-a;
+      else: --count-b);
+    else: none;
+  );
+  scroll-timeline: --count-self x, var(--count-name) x;
+}
+::column::scroll-marker:target-current:hover {
+  view-timeline-name: --mapping, --place;
+}
+@function --initial-color() returns type(black | white | transparent) {
+  result: if(
+    style(
+      ((--row: 4) and (--col: 5)) or
+      ((--row: 5) and (--col: 4))): black;
+    style(
+      ((--row: 4) and (--col: 4)) or
+      ((--row: 5) and (--col: 5))): white;
+    else: transparent;
+  );
+}
+@function --↔(--i <integer>: var(--row)) returns <custom-ident> {
+  result: if(
+    style(--ab: a): if(
+      style(--i: 1): a↔1;   style(--i: 5): a↔5;
+      style(--i: 2): a↔2;   style(--i: 6): a↔6;
+      style(--i: 3): a↔3;   style(--i: 7): a↔7;
+      style(--i: 4): a↔4;   else: a↔8);
+    else: if(
+      style(--i: 1): b↔1;   style(--i: 5): b↔5;
+      style(--i: 2): b↔2;   style(--i: 6): b↔6;
+      style(--i: 3): b↔3;   style(--i: 7): b↔7;
+      style(--i: 4): b↔4;   else: b↔8);
+  );
+}
+@function --↕(--i <integer>: var(--col)) returns <custom-ident> {
+  result: if(
+    style(--ab: a): if(
+      style(--i: 1): a↕1;   style(--i: 5): a↕5;
+      style(--i: 2): a↕2;   style(--i: 6): a↕6;
+      style(--i: 3): a↕3;   style(--i: 7): a↕7;
+      style(--i: 4): a↕4;   else: a↕8);
+    else: if(
+      style(--i: 1): b↕1;   style(--i: 5): b↕5;
+      style(--i: 2): b↕2;   style(--i: 6): b↕6;
+      style(--i: 3): b↕3;   style(--i: 7): b↕7;
+      style(--i: 4): b↕4;   else: b↕8);
+  );
+}
+@function --⤡(--i <integer>: calc(var(--row) - var(--col) + 8)) returns <custom-ident> {
+  result: if(
+    style(--ab: a): if(
+      style(--i: 1): a⤡1;   style(--i: 6): a⤡6;     style(--i: 11): a⤡11;
+      style(--i: 2): a⤡2;   style(--i: 7): a⤡7;     style(--i: 12): a⤡12;
+      style(--i: 3): a⤡3;   style(--i: 8): a⤡8;     style(--i: 13): a⤡13;
+      style(--i: 4): a⤡4;   style(--i: 9): a⤡9;     style(--i: 14): a⤡14;
+      style(--i: 5): a⤡5;   style(--i: 10): a⤡10;   else: a⤡15);
+    else: if(
+      style(--i: 1): b⤡1;   style(--i: 6): b⤡6;     style(--i: 11): b⤡11;
+      style(--i: 2): b⤡2;   style(--i: 7): b⤡7;     style(--i: 12): b⤡12;
+      style(--i: 3): b⤡3;   style(--i: 8): b⤡8;     style(--i: 13): b⤡13;
+      style(--i: 4): b⤡4;   style(--i: 9): b⤡9;     style(--i: 14): b⤡14;
+      style(--i: 5): b⤡5;   style(--i: 10): b⤡10;   else: b⤡15);
+  );
+}
+@function --⤢(--i <integer>: calc(var(--row) + var(--col) - 1)) returns <custom-ident> {
+  result: if(
+    style(--ab: a): if(
+      style(--i: 1): a⤢1;   style(--i: 6): a⤢6;     style(--i: 11): a⤢11;
+      style(--i: 2): a⤢2;   style(--i: 7): a⤢7;     style(--i: 12): a⤢12;
+      style(--i: 3): a⤢3;   style(--i: 8): a⤢8;     style(--i: 13): a⤢13;
+      style(--i: 4): a⤢4;   style(--i: 9): a⤢9;     style(--i: 14): a⤢14;
+      style(--i: 5): a⤢5;   style(--i: 10): a⤢10;   else: a⤢15);
+    else: if(
+      style(--i: 1): b⤢1;   style(--i: 6): b⤢6;     style(--i: 11): b⤢11;
+      style(--i: 2): b⤢2;   style(--i: 7): b⤢7;     style(--i: 12): b⤢12;
+      style(--i: 3): b⤢3;   style(--i: 8): b⤢8;     style(--i: 13): b⤢13;
+      style(--i: 4): b⤢4;   style(--i: 9): b⤢9;     style(--i: 14): b⤢14;
+      style(--i: 5): b⤢5;   style(--i: 10): b⤢10;   else: b⤢15);
+  );
+}
+@counter-style x1 {
+  symbols: '0';
+  fallback: -none;
+}
+@counter-style x65 {
+  symbols: ' ';
+  fallback: -none;
+}
+@counter-style valid-x1 {
+  symbols: '0';
+  range: 1 6;
+  fallback: -none;
+}
+@counter-style valid-x8 {
+  symbols: '00000000';
+  range: 1 6;
+  fallback: -none;
+}
+@counter-style valid-x64 {
+  symbols: ' ';
+  range: 1 6;
+  fallback: -none;
+}
+@counter-style valid-x512 {
+  symbols: '        ';
+  range: 1 6;
+  fallback: -none;
+}
+@counter-style -none {
+  system: cyclic;
+  symbols: '';
+}
+@keyframes count-self {
+  to { --count-self: 4096 }
+}
+@keyframes count-a {
+  to { --count-a: 4096 }
+}
+@keyframes count-b {
+  to { --count-b: 4096 }
+}
+@keyframes score {
+  to { --score: 8192 }
+}
+@property --count-self {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --count-a {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --count-b {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --score {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --player {
+  syntax: 'black | white';
+  inherits: true;
+  initial-value: black;
+}
+@property --ab {
+  syntax: 'a | b';
+  inherits: false;
+  initial-value: a;
+}
+@property --Δ→ {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --Δ↓ {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --is-writing {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --written-color {
+  syntax: 'none | black | white';
+  inherits: false;
+  initial-value: none;
+}
+@property --square-color {
+  syntax: 'black | white | transparent';
+  inherits: false;
+  initial-value: transparent;
+}
+/* P: player, O: opponent, E: empty */
+@property --square {
+  syntax: 'P | O | E';
+  inherits: false;
+  initial-value: E;
+}
+
+/* Always true. This is only a label: delete the block when the bug is fixed. */
+@supports (--bug571407511: --unfixed) {
+  ::column::scroll-marker {
+    --Δ↑: calc(var(--place-row) - var(--row));
+    --Δ←: calc(var(--place-col) - var(--col));
+    --is-writing: if(
+      style((--count-a: 0) and (--count-b: 0)): 0;
+      style((--Δ↓: 0) and ((0 <= var(--Δ→) <= var(--→)) or (0 <= var(--Δ←) <= var(--←)))): 1;
+      style((--Δ→: 0) and ((0 <= var(--Δ↓) <= var(--↓)) or (0 <= var(--Δ↑) <= var(--↑)))): 1;
+      style((--Δ→: var(--Δ↓)) and ((0 <= var(--Δ→) <= var(--↘)) or (0 <= var(--Δ←) <= var(--↖)))): 1;
+      style((--Δ→: var(--Δ↑)) and ((0 <= var(--Δ→) <= var(--↗)) or (0 <= var(--Δ←) <= var(--↙)))): 1;
+      else: 0;
+    );
+  }
+}
+@supports (--bug585707051: --unfixed) {
+  body::after { counter-reset: _ var(--id) }
+}
