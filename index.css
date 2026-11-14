@@ -8,7 +8,7 @@ html::after {
 body {
   height: 128px;
   columns: 128;
-  scroll-marker-group: after;
+  scroll-marker-group: before;
 }
 body::before {
   content: '';

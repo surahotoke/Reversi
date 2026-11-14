@@ -33,7 +33,7 @@ body {
   animation: mapping linear reverse both, count-a linear, count-b linear;
   animation-timeline: --place, --count-a, --count-b;
   animation-range:
-    contain calc(100% - 127*var(--square-size)),
+    contain calc(100% - --ss(127)),
     -100% calc(4096px - 100%),
     -100% calc(4096px - 100%);
   --place-row: --row();

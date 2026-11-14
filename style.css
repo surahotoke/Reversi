@@ -1,7 +1,10 @@
 :root {
-  --square-size: 60px;
-  --square-border: 2px black;
+  --square-size: round(min(11dvw, 9dvh), 1px);
+  --square-border: max(1px, round(--ss(.03), 1px)) black;
   --board-color: green;
+}
+html {
+  font-size: --ss(.35);
 }
 html::before, html::after {
   position: absolute;
@@ -9,21 +12,22 @@ html::before, html::after {
 }
 html::before {
   position-area: top;
-  font-size: 4rem;
+  font-size: 2.5rem;
 }
 html::after {
   position-area: bottom;
   white-space: pre-wrap;
-  tab-size: calc(.6*8*var(--square-size));
-  font-size: 2rem;
+  tab-size: calc(.6*--ss(8));
+  font-size: 1.3rem;
 }
 ::scroll-marker-group {
   anchor-name: --board;
+  margin-top: --ss(1.6);
   margin-inline: auto;
-  width: calc(8*var(--square-size));
-  height: calc(8*var(--square-size));
-  border: solid 8px;
-  border-radius: 12px;
+  width: --ss(8);
+  height: --ss(8);
+  border: solid --ss(.15);
+  border-radius: --ss(.21);
   background: var(--board-color);
   display: flex;
   overflow: hidden;
@@ -32,15 +36,15 @@ html::after {
   timeline-scope: --mapping;
   animation: mapping linear reverse both;
   animation-timeline: --mapping;
-  animation-range: contain calc(100% - 127*var(--square-size));
+  animation-range: contain calc(100% - --ss(127));
 }
 ::column::scroll-marker {
   width: 0;
   height: 0;
-  padding: calc(var(--square-size)/2);
+  padding: --ss(.5);
   box-shadow: inset 0 0 0 var(--square-border);
-  border-radius: 4px;
-  translate: calc((--col() - var(--id)) * var(--square-size)) calc((--row() - 1) * var(--square-size));
+  border-radius: --ss(.06);
+  translate: --ss(calc(--col() - var(--id))) --ss(calc(--row() - 1));
   view-timeline: --mapping x;
   --row: --row();
   --col: --col();
@@ -49,8 +53,8 @@ html::after {
     else: alpha(from var(--player) / var(--hint-alpha, 20%));
   );
   background:
-    radial-gradient(var(--hint-color, transparent) calc(.12*var(--square-size)), transparent 0),
-    radial-gradient(var(--square-color, transparent) calc(.32*var(--square-size)), transparent 0);
+    radial-gradient(var(--hint-color, transparent) --ss(.12), transparent 0),
+    radial-gradient(var(--square-color, transparent) --ss(.32), transparent 0);
 }
 ::column::scroll-marker:hover { --hint-alpha: 50% }
 ::column::scroll-marker:hover:active { --hint-alpha: 80% }
@@ -70,6 +74,10 @@ html::after {
 }
 @function --digit(--x <integer>, --place <integer>: 1, --base <integer>: 8) returns <integer> {
   result: mod(round(down, var(--x) / var(--place)), var(--base));
+}
+/* ss: square size. --ss(8) is the length of 8 squares */
+@function --ss(--number <number>: 1) returns <length> {
+  result: calc(var(--number) * var(--square-size));
 }
 @keyframes mapping {
   from { --id: 1 }
