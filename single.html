@@ -404,6 +404,15 @@ body::after {
   inherits: false;
   initial-value: E;
 }
+@supports not (
+  selector(::column::scroll-marker) and
+  (text-overflow: 'Chrome 157: bug566965154 fixed')
+) {
+  html::after {
+    white-space: normal;
+    content: 'This game needs Chrome 157 or later on desktop or Android.';
+  }
+}
 
 /* Always true. This is only a label: delete the block when the bug is fixed. */
 @supports (--bug571407511: --unfixed) {
