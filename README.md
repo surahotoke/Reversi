@@ -2,7 +2,7 @@
 
 Reversi written entirely in CSS. Minimal HTML, zero JavaScript.
 
-**[Play it here](https://surahotoke.github.io/Reversi)** (tested on Chrome 157)
+**[Play it here](https://surahotoke.github.io/Reversi)** (requires Chrome 157 or later)
 
 ## Files
 
