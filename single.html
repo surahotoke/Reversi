@@ -16,13 +16,23 @@ html {
   timeline-scope: --score;
   animation: score linear;
   animation-timeline: --score;
-  animation-range: -100% calc(8192px - 100%);
-  --stones: --digit(var(--score), 1, 65);
-  --black: --digit(var(--score), 65, 65);
+  animation-range: -100% calc(65536px - 100%);
+  --has-moves: --digit(var(--score), 1, 2);
+  --is-passes-odd: --digit(var(--score), 2, 2);
+  --is-after-pass: --digit(var(--score), 4, 2);
+  --stones: --digit(var(--score), 8, 65);
+  --black: --digit(var(--score), 520, 65);
   --white: calc(var(--stones) - var(--black));
   --player: if(
-    style(mod(var(--stones), 2) = 0): black;
+    style(mod(var(--stones) + var(--is-passes-odd), 2) = 0): black;
     else: white;
+  );
+  --game-state: if(
+    style(--score: 0): loading;
+    style(--stones: 64): over;
+    style(--has-moves: 1): playing;
+    style(--is-after-pass: 0): passing;
+    else: over;
   );
 }
 html::before, html::after {
@@ -35,10 +45,12 @@ html::before {
   font-size: 2.5rem;
 }
 html::after {
+  transition: --game-state 0s .2s allow-discrete;
   counter-reset: result calc(2 + sign(var(--white) - var(--black)));
   content: if(
-    style(var(--stones) < 64): '●' counter(black) '\9○' counter(white);
-    else: counter(result, symbols('●WIN' 'DRAW' '○WIN')) ' ' counter(black) ' - ' counter(white);
+    style(--game-state: passing): 'pass...';
+    style(--game-state: over): counter(result, symbols('●WIN' 'DRAW' '○WIN')) ' ' counter(black) ' - ' counter(white);
+    else: '●' counter(black) '\9○' counter(white);
   );
   position-area: bottom;
   white-space: pre-wrap;
@@ -50,7 +62,7 @@ body {
   columns: 128;
   scroll-marker-group: before;
   counter-reset:
-    stones black white
+    moves passes last-pass stones black white
     a↔1 a↔2 a↔3 a↔4 a↔5 a↔6 a↔7 a↔8
     a↕1 a↕2 a↕3 a↕4 a↕5 a↕6 a↕7 a↕8
     a⤡1 a⤡2 a⤡3 a⤡4 a⤡5 a⤡6 a⤡7 a⤡8 a⤡9 a⤡10 a⤡11 a⤡12 a⤡13 a⤡14 a⤡15
@@ -83,7 +95,12 @@ body::before {
   height: 100%;
 }
 body::after {
-  content: counter(black, x65) counter(stones, x1);
+  content:
+    counter(black, x520)
+    counter(stones, x8)
+    counter(last-pass, positive-4)
+    counter(passes, odd-2)
+    counter(moves, positive-1);
   position: fixed;
   width: 0;
   height: 0;
@@ -91,7 +108,7 @@ body::after {
   font-size: 0;
   white-space: pre;
   letter-spacing: 1px;
-  word-spacing: 64px;
+  word-spacing: 519px;
   line-height: .1px;
   scroll-timeline: --score x;
 }
@@ -130,7 +147,7 @@ body::after {
   --col: --col();
   --Δ↓: calc(var(--row) - var(--place-row));
   --Δ→: calc(var(--col) - var(--place-col));
-  --is-writing: if(
+  --is-writing-color: if(
     style((--count-a: 0) and (--count-b: 0)): 0;
     style((--Δ↓: 0) and (calc(-1*var(--←)) <= var(--Δ→) <= var(--→))): 1;
     style((--Δ→: 0) and (calc(-1*var(--↑)) <= var(--Δ↓) <= var(--↓))): 1;
@@ -138,11 +155,15 @@ body::after {
     style((--Δ→: calc(-1*var(--Δ↓))) and (calc(-1*var(--↙)) <= var(--Δ→) <= var(--↗))): 1;
     else: 0;
   );
-  --written-color: if(style(--is-writing: 1): var(--player));
-  transition: if(
-    style(--is-writing: 1): none;
-    else: --written-color 0s 9e9s allow-discrete;
+  --is-writing-pass: if(
+    style((--id: var(--stones)) and (--game-state: passing)): 1;
+    else: 0;
   );
+  --written-color: if(style(--is-writing-color: 1): var(--player));
+  --written-pass: if(style(--is-writing-pass: 1): passed);
+  transition:
+    if(style(--is-writing-color: 1): -none; else: --written-color 0s 9e9s allow-discrete),
+    --written-pass 0s if(style(--is-writing-pass: 1): 1s; else: 9e9s) allow-discrete;
   --hint-color: if(
     style(--count-self: 0): transparent;
     else: alpha(from var(--player) / var(--hint-alpha, 20%));
@@ -167,12 +188,19 @@ body::after {
   counter-set: if(style(--square: P): var(--↔) -7 var(--↕) -7 var(--⤡) -7 var(--⤢) -7);
   counter-increment:
     if(
-      style(--square-color: transparent):;
-      style(--ab: a): stones var(--square-color);
-      else:)
-    if(
       style(--square: E): var(--↔) 7 var(--↕) 7 var(--⤡) 7 var(--⤢) 7;
       style(--square: O): var(--↔) var(--↕) var(--⤡) var(--⤢);
+      else:)
+    if(
+      style(--count-self: 0):;
+      else: moves)
+    if(
+      style(--written-pass: none):;
+      style(--id: var(--stones)): passes last-pass;
+      else: passes)
+    if(
+      style(--square-color: transparent):;
+      style(--ab: a): stones var(--square-color);
       else:);
   content: if(
     style(--square: E):
@@ -288,11 +316,27 @@ body::after {
 @function --ss(--number <number>: 1) returns <length> {
   result: calc(var(--number) * var(--square-size));
 }
-@counter-style x1 {
+@counter-style positive-1 {
+  system: cyclic;
   symbols: '0';
+  range: 1 infinite;
   fallback: -none;
 }
-@counter-style x65 {
+@counter-style odd-2 {
+  system: cyclic;
+  symbols: '00' '';
+}
+@counter-style positive-4 {
+  system: cyclic;
+  symbols: '0000';
+  range: 1 infinite;
+  fallback: -none;
+}
+@counter-style x8 {
+  symbols: '00000000';
+  fallback: -none;
+}
+@counter-style x520 {
   symbols: ' ';
   fallback: -none;
 }
@@ -334,7 +378,7 @@ body::after {
   to { --count-b: 4096 }
 }
 @keyframes score {
-  to { --score: 8192 }
+  to { --score: 65536 }
 }
 @property --id {
   syntax: '<integer>';
@@ -366,6 +410,11 @@ body::after {
   inherits: true;
   initial-value: black;
 }
+@property --game-state {
+  syntax: 'loading | playing | passing | over';
+  inherits: true;
+  initial-value: loading;
+}
 @property --ab {
   syntax: 'a | b';
   inherits: false;
@@ -381,13 +430,23 @@ body::after {
   inherits: false;
   initial-value: 0;
 }
-@property --is-writing {
+@property --is-writing-color {
+  syntax: '<integer>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --is-writing-pass {
   syntax: '<integer>';
   inherits: false;
   initial-value: 0;
 }
 @property --written-color {
   syntax: 'none | black | white';
+  inherits: false;
+  initial-value: none;
+}
+@property --written-pass {
+  syntax: 'none | passed';
   inherits: false;
   initial-value: none;
 }
@@ -414,7 +473,7 @@ body::after {
   ::column::scroll-marker {
     --Δ↑: calc(var(--place-row) - var(--row));
     --Δ←: calc(var(--place-col) - var(--col));
-    --is-writing: if(
+    --is-writing-color: if(
       style((--count-a: 0) and (--count-b: 0)): 0;
       style((--Δ↓: 0) and ((0 <= var(--Δ→) <= var(--→)) or (0 <= var(--Δ←) <= var(--←)))): 1;
       style((--Δ→: 0) and ((0 <= var(--Δ↓) <= var(--↓)) or (0 <= var(--Δ↑) <= var(--↑)))): 1;

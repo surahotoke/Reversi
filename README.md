@@ -17,7 +17,6 @@ Reversi written entirely in CSS. Minimal HTML, zero JavaScript.
 ## Notes
 
 - It works even with JavaScript turned off in the browser settings.
-- There is no pass. If the player to move has no legal move, the game stops there.
 
 ## Links
 
