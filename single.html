@@ -461,6 +461,9 @@ body::after {
   inherits: false;
   initial-value: E;
 }
+@media (resolution < 1x) {
+  html::after { content: 'Press [Ctrl/⌘] and [+] to zoom in.' }
+}
 @supports not (
   selector(::column::scroll-marker) and
   (text-overflow: 'Chrome 157: bug566965154 fixed')
