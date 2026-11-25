@@ -30,7 +30,6 @@ html::after {
   border-radius: --ss(.21);
   background: var(--board-color);
   display: flex;
-  overflow: hidden;
 }
 ::column {
   timeline-scope: --mapping;
@@ -45,7 +44,7 @@ html::after {
   box-shadow: inset 0 0 0 var(--square-border);
   border-radius: --ss(.06);
   translate: --ss(calc(--col() - var(--id))) --ss(calc(--row() - 1));
-  view-timeline: --mapping x;
+  view-timeline: --mapping x calc(50% - --ss(4));
   --row: --row();
   --col: --col();
   --hint-color: if(

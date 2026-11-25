@@ -113,7 +113,7 @@ body::after {
     style(--written-color: none): --initial-color();
     else: var(--written-color);
   );
-  pointer-events: if(style(--count-self: 0): none);
+  interactivity: if(style(--count-self: 0): inert);
   --↔: --↔();
   --↕: --↕();
   --⤡: --⤡();

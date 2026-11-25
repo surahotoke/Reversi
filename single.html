@@ -122,7 +122,6 @@ body::after {
   border-radius: --ss(.21);
   background: var(--board-color);
   display: flex;
-  overflow: hidden;
 }
 ::column {
   timeline-scope: --mapping, --count-self;
@@ -175,7 +174,7 @@ body::after {
   background:
     radial-gradient(var(--hint-color) --ss(.12), transparent 0),
     radial-gradient(var(--square-color) --ss(.32), transparent 0);
-  pointer-events: if(style(--count-self: 0): none);
+  interactivity: if(style(--count-self: 0): inert);
   --↔: --↔();
   --↕: --↕();
   --⤡: --⤡();
@@ -217,7 +216,7 @@ body::after {
     else: none;
   );
   scroll-timeline: --count-self x, var(--count-name) x;
-  view-timeline: --mapping x;
+  view-timeline: --mapping x calc(50% - --ss(4));
 }
 ::column::scroll-marker:hover { --hint-alpha: 50% }
 ::column::scroll-marker:hover:active { --hint-alpha: 80% }
