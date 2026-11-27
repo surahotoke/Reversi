@@ -100,7 +100,8 @@ body::after {
     counter(stones, x8)
     counter(last-pass, positive-4)
     counter(passes, odd-2)
-    counter(moves, positive-1);
+    counter(moves, positive-1)
+    / '';
   position: fixed;
   width: 0;
   height: 0;
@@ -201,6 +202,7 @@ body::after {
       style(--square-color: transparent):;
       style(--ab: a): stones var(--square-color);
       else:);
+  counter-reset: row var(--row) col var(--col);
   content: if(
     style(--square: E):
       counter(var(--⤢), valid-x512)
@@ -208,7 +210,7 @@ body::after {
       counter(var(--↕), valid-x8)
       counter(var(--↔), valid-x1);
     else: '';
-  );
+  ) / counter(col, lower-alpha) counter(row);
   --count-name: if(
     style((--row: var(--place-row)) and (--col: var(--place-col))): if(
       style(--ab: a): --count-a;
@@ -484,9 +486,6 @@ body::after {
       else: 0;
     );
   }
-}
-@supports (--bug585707051: --unfixed) {
-  body::after { counter-reset: _ var(--id) }
 }
 </style>
 </head>
